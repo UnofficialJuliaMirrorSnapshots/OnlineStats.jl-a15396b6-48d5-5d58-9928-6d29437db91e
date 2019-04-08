@@ -1,0 +1,12 @@
+*.png
+*.gif
+
+# coveralls files
+*.cov
+
+*.ipynb
+
+test/experiment.jl
+
+*site/
+docs/build
