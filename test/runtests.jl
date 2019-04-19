@@ -1,5 +1,4 @@
 using OnlineStats, Test, LinearAlgebra, Random, StatsBase, Statistics, Dates
-using DataStructures: SortedDict
 
 #-----------------------------------------------------------------------# utils
 n = 1000
@@ -50,34 +49,6 @@ end
     @test value(o) ≈ mean(y)
     @test i == n
     @test ≈(mergevals(CallFun(Mean(), x->nothing), y, y2)...)
-end
-#-----------------------------------------------------------------------# CountMap
-@testset "CountMap" begin
-    a = fit!(CountMap(Bool), x)
-    @test sort(value(a)) == sort(countmap(x))
-    @test OnlineStats.pdf(a, true) == mean(x)
-    @test OnlineStats.pdf(a, false) == mean(!, x)
-    @test OnlineStats.pdf(a, 2) == 0.0
-
-    b = fit!(CountMap(Int), z)
-    @test sort(value(b)) == sort(countmap(z))
-    for i in 1:11
-        @test OnlineStats.pdf(b, i) ≈ sum(==(i), z) / n
-    end
-    @test all(x -> 0 < x < 1, probs(b))
-    @test probs(b, 11:13) == zeros(3)
-
-    c = fit!(CountMap(SortedDict{Bool, Int}()), x)
-    @test value(c) == sort(countmap(x))
-    @test probs(c) == [mean(!, x), mean(x)]
-
-    d = fit!(CountMap(SortedDict{Int,Int}()), z)
-    @test value(d) == sort(countmap(z))
-
-    @test ==(mergevals(CountMap(Bool), x, x2)...)
-    @test ==(mergevals(CountMap(SortedDict{Bool,Int}()), x, x2)...)
-    @test ==(mergevals(CountMap(Int), z, z2)...)
-    @test ==(mergevals(CountMap(SortedDict{Int,Int}()), z, z2)...)
 end
 #-----------------------------------------------------------------------# CovMatrix
 @testset "CovMatrix" begin
@@ -275,7 +246,7 @@ end
     @test mean(o) ≈ mean(y)
     @test var(o) ≈ var(y)
     @test median(o) ≈ median(y)
-    @test quantile(o) ≈ quantile(y)
+    @test quantile(o) ≈ quantile(y, [0, .25, .5, .75, 1])
     @test std(o) ≈ std(y)
     @test extrema(o) == extrema(y)
 
@@ -426,7 +397,7 @@ end
     @test ≈(mergevals(OrderStats(100), y, y2)...)
     o = fit!(OrderStats(n), y)
     @test value(o) == sort(y)
-    @test quantile(o) == quantile(y)
+    @test quantile(o, 0:.25:1) == quantile(y, 0:.25:1)
 end
 #-----------------------------------------------------------------------# Partition
 @testset "Partition" begin
@@ -481,11 +452,11 @@ end
         @test (yi ∈ y) || (yi ∈ y2)
     end
 end
-#-----------------------------------------------------------------------# StatHistory
-@testset "StatHistory" begin
-    o = fit!(StatHistory(Mean(), 10), 1:20)
-    @test length(value(o)) == 10
-    for (i, m) in enumerate(reverse(o.circbuff))
+#-----------------------------------------------------------------------# StatLag
+@testset "StatLag" begin
+    o = fit!(StatLag(Mean(), 10), 1:20)
+    @test length(o.lag.value) == 10
+    for (i, m) in enumerate(reverse(o.lag.value))
         @test nobs(m) == 10 + i
     end
     @test nobs(value(o)[1]) == 20

@@ -3,20 +3,21 @@ module OnlineStats
 using RecipesBase, Reexport, Statistics, LinearAlgebra, Dates
 @reexport using OnlineStatsBase, LossFunctions, PenaltyFunctions, LearnBase
 
-import OnlineStatsBase: OnlineStat, name, _fit!, _merge!, eachrow, smooth, smooth!,
-    smooth_syr!, bessel, Extrema, StatCollection, Mean, Variance, Series, FTSeries
-import LearnBase: fit!, nobs, value, predict, transform, transform!
+import OnlineStatsBase: OnlineStat, name, _fit!, _merge!, eachrow, smooth, smooth!, pdf,
+    probs, smooth_syr!, bessel, Extrema, StatCollection, Mean, Variance, Series, FTSeries
+import LearnBase: fit!, nobs, value, predict
 import StatsBase: autocov, autocor, confint, skewness, kurtosis, entropy, midpoints,
     fweights, sample, coef, Histogram
-import DataStructures: OrderedDict, CircularBuffer
-import SweepOperator
+
+using OrderedCollections: OrderedDict
+using SweepOperator: sweep!
 
 export
 # Statistics
     mean, var, std, cov, cor,
 # functions
     fit!, nobs, value, autocov, autocor, predict, confint, probs, skewness, kurtosis,
-    classify, coef, transform, transform!, stats, series,
+    classify, coef, stats, series,
 # weights
     EqualWeight, ExponentialWeight, LearningRate, LearningRate2, HarmonicWeight,
     McclainWeight, Bounded, Scaled,
@@ -41,7 +42,7 @@ export
     Partition, PlotNN, ProbMap, P2Quantile,
     Quantile,
     ReservoirSample,
-    Series, StatLearn, StatHistory, Sum,
+    Series, StatLearn, StatHistory, StatLag, Sum,
     Variance,
     KahanSum, KahanMean, KahanVariance,
 # other
