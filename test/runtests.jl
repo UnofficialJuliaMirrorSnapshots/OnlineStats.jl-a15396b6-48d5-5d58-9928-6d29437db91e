@@ -195,7 +195,7 @@ end
             for data in (y, -6:.75:6)
                 w  = fit(Histogram, data, edges, closed = :left).weights
                 w2 = fit(Histogram, data, edges, closed = :right).weights
-                @test fit!(Hist(edges, Number; closed=false),             data).counts == w
+                @test fit!(Hist(edges, Number; closed=false, left=true),  data).counts == w
                 @test fit!(Hist(edges, Number; closed=false, left=false), data).counts == w2
             end
         end
